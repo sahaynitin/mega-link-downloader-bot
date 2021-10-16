@@ -1,60 +1,33 @@
-import logging
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-
 import os
-
 if bool(os.environ.get("WEBHOOK", False)):
-    from sample_config import Config
+    from Config import Config
 else:
     from config import Config
-
-
 from translation import Translation
-
-import pyrogram
-logging.getLogger("pyrogram").setLevel(logging.WARNING)
-
-from database.blacklist import check_blacklist
-from database.userchats import add_chat
-
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-REPLY_MARKUP = InlineKeyboardMarkup(
-    [
-        [InlineKeyboardButton("🚀 Deploy Yours Now! 😍", url="https://github.com/XMYSTERlOUSX/mega-link-downloader-bot")],
-    ]
-)
-
-@Client.on_message(filters.command("help"))
-async def help_user(bot, update):
-    fuser = update.from_user.id
-    if check_blacklist(fuser):
-        await update.reply_text("Sorry! You are Banned!")
-        return
-    add_chat(fuser)
-    await bot.send_message(
-        chat_id=update.chat.id,
-        text=Translation.HELP_USER,
-        parse_mode="html",
-        reply_markup=REPLY_MARKUP,
+@Client.on_message(filters.command(["start"]) & filters.private)
+async def start(bot, update):
+    await update.reply_text(
+        text=Translation.START_TEXT.format(update.from_user.mention),
         disable_web_page_preview=True,
-        reply_to_message_id=update.message_id
+        reply_markup=Translation.START_BUTTONS
     )
 
-@Client.on_message(filters.command("start"))
-async def start(bot, update):
-    fuser = update.from_user.id
-    if check_blacklist(fuser):
-        await update.reply_text("Sorry! You are Banned!")
-        return
-    add_chat(fuser)
-    await bot.send_message(
-        chat_id=update.chat.id,
-        text=Translation.START_TEXT,
-        reply_markup=REPLY_MARKUP,
+
+@Client.on_message(filters.command(["help"]) & filters.private)
+async def help(bot, update):
+    await update.reply_text(
+        text=Translation.HELP_TEXT,
         disable_web_page_preview=True,
-        reply_to_message_id=update.message_id
+        reply_markup=Translation.HELP_BUTTONS
+    )
+
+@Client.on_message(filters.command(["about"]) & filters.private)
+async def about(bot, update):
+    await update.reply_text(
+        text=Translation.ABOUT_TEXT,
+        disable_web_page_preview=True,
+        reply_markup=Translation.ABOUT_BUTTONS
     )
