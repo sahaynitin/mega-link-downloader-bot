@@ -26,7 +26,6 @@ logging.getLogger("pyrogram").setLevel(logging.WARNING)
 @Client.on_message(filters.photo)
 async def save_photo(bot, update):
      await update.reply_text("Sorry! You are Banned!")
-        return
         # album is sent
         download_location = Config.DOWNLOAD_LOCATION + "/" + str(update.from_user.id) + "/" + str(update.media_group_id) + "/"
         # create download directory, if not exist
